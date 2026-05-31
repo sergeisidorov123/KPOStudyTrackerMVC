@@ -19,3 +19,4 @@ class User(Base):
     courses = relationship("Course", back_populates="user")
     tasks = relationship("Task", back_populates="user")
     group = relationship("Group", back_populates="user")
+    token = relationship("Token", back_populates="user")
