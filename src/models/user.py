@@ -13,6 +13,9 @@ class User(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     username: Mapped[str] = mapped_column(String(150), unique=True, nullable=False, index=True)
     password_hash: Mapped[str] = mapped_column(String(150), nullable=False)
+    group: Mapped[str] = mapped_column(String(150), nullable=True)
     role: Mapped[User] = mapped_column(Enum(User), default=User.USER)
     
     courses = relationship("Course", back_populates="user")
+    tasks = relationship("Task", back_populates="user")
+    group = relationship("Group", back_populates="user")

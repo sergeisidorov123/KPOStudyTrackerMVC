@@ -11,3 +11,5 @@ class Course(Base):
     
     
     user = relationship("User", back_populates="courses")
+    group = relationship("Group", back_populates="course")
+    tasks = relationship("Task", back_populates="course")

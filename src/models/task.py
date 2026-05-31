@@ -20,3 +20,5 @@ class Task(Base):
     deadline: Mapped[str] = mapped_column(String(50), nullable=True)
     status = mapped_column(Enum(TaskStatus), default=TaskStatus.TO_DO)
     
+    course = relationship("Course", back_populates="tasks")
+    user = relationship("User", back_populates="tasks")
