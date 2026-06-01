@@ -3,7 +3,7 @@ from src.core.database import Base
 import enum
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
-class User(enum.Enum):
+class UserEnum(enum.Enum):
     ADMIN = "admin"
     USER = "user"
 
@@ -13,8 +13,8 @@ class User(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     username: Mapped[str] = mapped_column(String(150), unique=True, nullable=False, index=True)
     password_hash: Mapped[str] = mapped_column(String(150), nullable=False)
-    group: Mapped[str] = mapped_column(String(150), nullable=True)
-    role: Mapped[User] = mapped_column(Enum(User), default=User.USER)
+    role: Mapped[UserEnum] = mapped_column(Enum(UserEnum), default=UserEnum.USER)
+    
     
     courses = relationship("Course", back_populates="user")
     tasks = relationship("Task", back_populates="user")
