@@ -1,4 +1,4 @@
-from sqlalchemy import Enum, Integer, String
+from sqlalchemy import Enum, Integer, String, ForeignKey
 from src.core.database import Base
 import enum
 from sqlalchemy.orm import relationship, Mapped, mapped_column
@@ -15,10 +15,9 @@ class Task(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     title: Mapped[str] = mapped_column(String(150), unique=True, nullable=False, index=True)
     description: Mapped[str] = mapped_column(String(500), nullable=True)
-    course_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    course_id: Mapped[int] = mapped_column(Integer, ForeignKey("course.id"), nullable=False)
     course = relationship("Course", back_populates="tasks")
     deadline: Mapped[str] = mapped_column(String(50), nullable=True)
     status = mapped_column(Enum(TaskStatus), default=TaskStatus.TO_DO)
     
-    course = relationship("Course", back_populates="tasks")
-    user = relationship("User", back_populates="tasks")
+    user = relationship("User", secondary="user_task", back_populates="tasks")
