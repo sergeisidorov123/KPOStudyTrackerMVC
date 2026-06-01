@@ -1,7 +1,7 @@
-from src.models import User
+from src.models import User, Group, Token
+from src.models.user import UserEnum
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.models import Token
 
 class UserRepository:
     def __init__(self, db: AsyncSession):
@@ -13,8 +13,15 @@ class UserRepository:
         )
         return result.scalar_one_or_none()
 
-    async def create_user(self, username: str, password_hash: str, group: str = None, role: str = "user") -> User:
-        new_user = User(username=username, password_hash=password_hash, group=group, role=role)
+    async def create_user(self, username: str, password_hash: str, name: str, group: str = None, role: str = "user") -> User:
+        if isinstance(role, str):
+            role = UserEnum(role)
+        new_user = User(username=username, password=password_hash, name=name, role=role)
+        if group is not None:
+            result = await self.db.execute(select(Group).where(Group.name == group))
+            group_obj = result.scalar_one_or_none()
+            if group_obj:
+                new_user.group = group_obj
         self.db.add(new_user)
         await self.db.commit()
         await self.db.refresh(new_user)
@@ -38,18 +45,25 @@ class UserRepository:
             return True
         return False
     
-    async def update_user(self, user_id: int, username: str = None, password_hash: str = None, group: str = None, role: str = None) -> User | None:
+    async def update_user(self, user_id: int, username: str = None, name: str = None, password_hash: str = None, group: str = None, role: str = None) -> User | None:
         user = await self.get_user_by_id(user_id)
         if not user:
             return None
         
         if username is not None:
             user.username = username
+        if name is not None:
+            user.name = name
         if password_hash is not None:
-            user.password_hash = password_hash
+            user.password = password_hash
         if group is not None:
-            user.group = group
+            result = await self.db.execute(select(Group).where(Group.name == group))
+            group_obj = result.scalar_one_or_none()
+            if group_obj:
+                user.group = group_obj
         if role is not None:
+            if isinstance(role, str):
+                role = UserEnum(role)
             user.role = role
         
         await self.db.commit()
@@ -83,4 +97,20 @@ class UserRepository:
             return True
         return False
     
+    async def get_user_courses(self, user_id: int):
+        user = await self.get_user_by_id(user_id)
+        if user:
+            return user.courses
+        return None
     
+    async def get_user_by_group(self, group: str) -> list[User]:
+        result = await self.db.execute(
+            select(User).where(User.group == group)
+        )
+        return result.scalars().all()
+    
+    async def get_user_tasks(self, user_id: int):
+        user = await self.get_user_by_id(user_id)
+        if user:
+            return user.tasks
+        return None
